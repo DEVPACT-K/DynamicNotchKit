@@ -7,13 +7,14 @@
 
 import SwiftUI
 
-struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded: View, CompactLeading: View, CompactTrailing: View {
-    @ObservedObject private var dynamicNotch: DynamicNotch<Expanded, CompactLeading, CompactTrailing>
+struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View where Expanded: View, CompactLeading: View, CompactTrailing: View, CompactBottom: View {
+    @ObservedObject private var dynamicNotch: DynamicNotch<Expanded, CompactLeading, CompactTrailing, CompactBottom>
     @State private var compactLeadingWidth: CGFloat = 0
     @State private var compactTrailingWidth: CGFloat = 0
+    @State private var compactBottomHeight: CGFloat = 0
     private let safeAreaInset: CGFloat = 15
 
-    init(dynamicNotch: DynamicNotch<Expanded, CompactLeading, CompactTrailing>) {
+    init(dynamicNotch: DynamicNotch<Expanded, CompactLeading, CompactTrailing, CompactBottom>) {
         self.dynamicNotch = dynamicNotch
     }
 
@@ -31,6 +32,10 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
 
     private var minWidth: CGFloat {
         dynamicNotch.notchSize.width + (topCornerRadius * 2)
+    }
+
+    private var compactContentHeight: CGFloat {
+        dynamicNotch.notchSize.height + compactBottomHeight
     }
 
     private var topCornerRadius: CGFloat {
@@ -58,7 +63,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
             .background {
                 Rectangle()
                     .foregroundStyle(.black)
-                    .padding(-50) // The opening/closing animation can overshoot, so this makes sure that it's still black
+                    .padding(-50)
             }
             .mask {
                 NotchShape(
@@ -68,12 +73,12 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
                 .padding(.horizontal, 0.5)
                 .frame(
                     width: dynamicNotch.state != .hidden ? nil : minWidth,
-                    height: dynamicNotch.state != .hidden ? nil : dynamicNotch.notchSize.height
+                    height: dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .offset(x: xOffset)
-            .animation(.smooth, value: [compactLeadingWidth, compactTrailingWidth])
+            .animation(.smooth, value: [compactLeadingWidth, compactTrailingWidth, compactBottomHeight])
     }
 
     private func notchContent() -> some View {
@@ -83,7 +88,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
                 .offset(x: dynamicNotch.state == .compact ? 0 : compactXOffset)
                 .frame(
                     width: dynamicNotch.state == .compact ? nil : dynamicNotch.notchSize.width,
-                    height: (dynamicNotch.state == .compact && dynamicNotch.isHovering) ? dynamicNotch.menubarHeight : dynamicNotch.notchSize.height
+                    height: dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
                 )
 
             expandedContent()
@@ -96,36 +101,45 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
         }
         .padding(.horizontal, topCornerRadius)
         .fixedSize()
-        .frame(minWidth: minWidth, minHeight: dynamicNotch.notchSize.height)
+        .frame(minWidth: minWidth, minHeight: dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height)
         .onHover(perform: dynamicNotch.updateHoverState)
     }
 
     func compactContent() -> some View {
-        HStack(spacing: 0) {
-            if dynamicNotch.state == .compact, !dynamicNotch.disableCompactLeading {
-                dynamicNotch.compactLeadingContent
-                    .environment(\.notchSection, .compactLeading)
-                    .safeAreaInset(edge: .leading, spacing: 0) { Color.clear.frame(width: 8) }
-                    .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
-                    .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                    .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactLeadingWidth = $0 }
-                    .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .trailing)).combined(with: .opacity))
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                if dynamicNotch.state == .compact, !dynamicNotch.disableCompactLeading {
+                    dynamicNotch.compactLeadingContent
+                        .environment(\.notchSection, .compactLeading)
+                        .safeAreaInset(edge: .leading, spacing: 0) { Color.clear.frame(width: 8) }
+                        .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
+                        .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
+                        .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactLeadingWidth = $0 }
+                        .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .trailing)).combined(with: .opacity))
+                }
+
+                Spacer()
+                    .frame(width: dynamicNotch.notchSize.width)
+
+                if dynamicNotch.state == .compact, !dynamicNotch.disableCompactTrailing {
+                    dynamicNotch.compactTrailingContent
+                        .environment(\.notchSection, .compactTrailing)
+                        .safeAreaInset(edge: .trailing, spacing: 0) { Color.clear.frame(width: 8) }
+                        .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
+                        .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
+                        .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactTrailingWidth = $0 }
+                        .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .leading)).combined(with: .opacity))
+                }
             }
+            .frame(height: dynamicNotch.notchSize.height)
 
-            Spacer()
-                .frame(width: dynamicNotch.notchSize.width)
-
-            if dynamicNotch.state == .compact, !dynamicNotch.disableCompactTrailing {
-                dynamicNotch.compactTrailingContent
-                    .environment(\.notchSection, .compactTrailing)
-                    .safeAreaInset(edge: .trailing, spacing: 0) { Color.clear.frame(width: 8) }
-                    .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
-                    .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                    .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactTrailingWidth = $0 }
-                    .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .leading)).combined(with: .opacity))
+            if dynamicNotch.state == .compact, !dynamicNotch.disableCompactBottom {
+                dynamicNotch.compactBottomContent
+                    .environment(\.notchSection, .compactBottom)
+                    .onGeometryChange(for: CGFloat.self, of: \.size.height) { compactBottomHeight = $0 }
+                    .transition(.blur(intensity: 10).combined(with: .scale(y: 0, anchor: .top)).combined(with: .opacity))
             }
         }
-        .frame(height: dynamicNotch.notchSize.height)
         .onChange(of: dynamicNotch.disableCompactLeading) { _ in
             if dynamicNotch.disableCompactLeading {
                 compactLeadingWidth = 0
@@ -134,6 +148,11 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing>: View where Expanded
         .onChange(of: dynamicNotch.disableCompactTrailing) { _ in
             if dynamicNotch.disableCompactTrailing {
                 compactTrailingWidth = 0
+            }
+        }
+        .onChange(of: dynamicNotch.disableCompactBottom) { _ in
+            if dynamicNotch.disableCompactBottom {
+                compactBottomHeight = 0
             }
         }
     }

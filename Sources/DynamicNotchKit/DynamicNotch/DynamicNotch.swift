@@ -55,7 +55,7 @@ import SwiftUI
 /// > There is also a `hoverBehavior` property of type ``DynamicNotchHoverBehavior``, which is available to modify how the window behaves when the user hovers over it.
 /// > This can be helpful if you wish to keep the notch open during hover events or add effects such as scaling or haptic feedback.
 ///
-public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing>: ObservableObject, DynamicNotchControllable where Expanded: View, CompactLeading: View, CompactTrailing: View {
+public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing, CompactBottom>: ObservableObject, DynamicNotchControllable where Expanded: View, CompactLeading: View, CompactTrailing: View, CompactBottom: View {
     /// Public in case user wants to modify the underlying NSPanel
     public var windowController: NSWindowController?
 
@@ -75,8 +75,10 @@ public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing>: Obse
     let expandedContent: Expanded
     let compactLeadingContent: CompactLeading
     let compactTrailingContent: CompactTrailing
+    let compactBottomContent: CompactBottom
     @Published var disableCompactLeading: Bool = false
     @Published var disableCompactTrailing: Bool = false
+    @Published var disableCompactBottom: Bool = false
 
     /// Notch Properties
     @Published private(set) var state: DynamicNotchState = .hidden
@@ -98,7 +100,8 @@ public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing>: Obse
         style: DynamicNotchStyle = .auto,
         @ViewBuilder expanded: @escaping () -> Expanded,
         @ViewBuilder compactLeading: @escaping () -> CompactLeading = { EmptyView() },
-        @ViewBuilder compactTrailing: @escaping () -> CompactTrailing = { EmptyView() }
+        @ViewBuilder compactTrailing: @escaping () -> CompactTrailing = { EmptyView() },
+        @ViewBuilder compactBottom: @escaping () -> CompactBottom = { EmptyView() }
     ) {
         self.hoverBehavior = hoverBehavior
         self.style = style
@@ -106,6 +109,7 @@ public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing>: Obse
         self.expandedContent = expanded()
         self.compactLeadingContent = compactLeading()
         self.compactTrailingContent = compactTrailing()
+        self.compactBottomContent = compactBottom()
 
         observeScreenParameters()
     }
@@ -119,16 +123,18 @@ public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing>: Obse
         hoverBehavior: DynamicNotchHoverBehavior = [.keepVisible],
         style: DynamicNotchStyle = .auto,
         @ViewBuilder expanded: @escaping () -> Expanded
-    ) where CompactLeading == EmptyView, CompactTrailing == EmptyView {
+    ) where CompactLeading == EmptyView, CompactTrailing == EmptyView, CompactBottom == EmptyView {
         self.init(
             hoverBehavior: hoverBehavior,
             style: style,
             expanded: expanded,
             compactLeading: { EmptyView() },
-            compactTrailing: { EmptyView() }
+            compactTrailing: { EmptyView() },
+            compactBottom: { EmptyView() }
         )
         self.disableCompactLeading = true
         self.disableCompactTrailing = true
+        self.disableCompactBottom = true
     }
 
     /// Resolves the effective opening animation (custom override or style default).
@@ -228,7 +234,7 @@ extension DynamicNotch {
             return
         }
 
-        if disableCompactLeading, disableCompactTrailing {
+        if disableCompactLeading, disableCompactTrailing, disableCompactBottom {
             await hide()
             return
         }

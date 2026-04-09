@@ -45,7 +45,7 @@ import SwiftUI
 /// > This can be helpful if you wish to keep the notch open during hover events or add effects such as scaling or haptic feedback.
 ///
 public final class DynamicNotchInfo: ObservableObject, DynamicNotchControllable {
-    var internalDynamicNotch: DynamicNotch<InfoView, CompactLeadingView, CompactTrailingView>!
+    var internalDynamicNotch: DynamicNotch<InfoView, CompactLeadingView, CompactTrailingView, EmptyView>!
 
     @Published public var icon: DynamicNotchInfo.Label?
     @Published public var title: LocalizedStringKey
@@ -91,6 +91,8 @@ public final class DynamicNotchInfo: ObservableObject, DynamicNotchControllable 
             CompactLeadingView(dynamicNotch: self)
         } compactTrailing: {
             CompactTrailingView(dynamicNotch: self)
+        } compactBottom: {
+            EmptyView()
         }
         if let compactLeading {
             self.compactLeading = compactLeading
