@@ -58,6 +58,35 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
         (compactTrailingWidth - compactLeadingWidth) / 2
     }
 
+    private var maskHeight: CGFloat {
+        dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
+    }
+
+    private var edgeOpacity: Double {
+        switch dynamicNotch.state {
+        case .hidden:
+            0.0
+        case .compact:
+            dynamicNotch.isHovering ? 0.11 : 0.08
+        case .expanded:
+            dynamicNotch.isHovering ? 0.08 : 0.05
+        }
+    }
+
+    @ViewBuilder
+    private var notchMaskShape: some View {
+        NotchShape(
+            topCornerRadius: topCornerRadius,
+            bottomCornerRadius: bottomCornerRadius
+        )
+        .padding(.horizontal, 0.5)
+        .frame(
+            width: dynamicNotch.state != .hidden ? nil : minWidth,
+            height: maskHeight
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
     var body: some View {
         notchContent()
             .background {
@@ -65,18 +94,19 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                     .foregroundStyle(.black)
                     .padding(-50)
             }
-            .mask {
-                NotchShape(
-                    topCornerRadius: topCornerRadius,
-                    bottomCornerRadius: bottomCornerRadius
-                )
-                .padding(.horizontal, 0.5)
-                .frame(
-                    width: dynamicNotch.state != .hidden ? nil : minWidth,
-                    height: dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .overlay {
+                notchMaskShape
+                    .overlay {
+                        NotchShape(
+                            topCornerRadius: topCornerRadius,
+                            bottomCornerRadius: bottomCornerRadius
+                        )
+                        .stroke(.white.opacity(edgeOpacity), lineWidth: 0.8)
+                        .padding(.horizontal, 0.9)
+                        .padding(.vertical, 0.4)
+                    }
             }
+            .mask { notchMaskShape }
             .offset(x: xOffset)
             .animation(.smooth, value: [compactLeadingWidth, compactTrailingWidth, compactBottomHeight])
     }
