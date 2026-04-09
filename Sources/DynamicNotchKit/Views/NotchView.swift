@@ -50,7 +50,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
         max(compactLeadingWidth, compactTrailingWidth)
     }
 
-    private var maskHeight: CGFloat {
+    private var maskHeight: CGFloat? {
         dynamicNotch.state == .compact ? compactContentHeight : nil
     }
 
