@@ -95,7 +95,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                     .padding(-50)
             }
             .overlay {
-                notchMaskShape
+                Color.clear
                     .overlay {
                         NotchShape(
                             topCornerRadius: topCornerRadius,
@@ -105,6 +105,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .padding(.horizontal, 0.9)
                         .padding(.vertical, 0.4)
                     }
+                    .mask { notchMaskShape }
             }
             .mask { notchMaskShape }
             .offset(x: xOffset)
