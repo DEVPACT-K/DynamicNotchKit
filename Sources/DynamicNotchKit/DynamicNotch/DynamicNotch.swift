@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+private final class DynamicNotchHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        true
+    }
+}
+
 // MARK: - DynamicNotch
 
 ///
@@ -176,6 +182,14 @@ public final class DynamicNotch<Expanded, CompactLeading, CompactTrailing, Compa
 // MARK: - Public
 
 extension DynamicNotch {
+    public func performInteractiveAction(_ action: () -> Void) {
+        if let panel = self.windowController?.window as? DynamicNotchPanel {
+            panel.performInteractiveAction(action)
+        } else {
+            action()
+        }
+    }
+
     public func expand(on screen: NSScreen = NSScreen.screens[0]) async {
         await _expand(on: screen, skipHide: transitionConfiguration.skipIntermediateHides)
     }
@@ -361,7 +375,7 @@ private extension DynamicNotch {
         menubarHeight = screen.menubarHeight
 
         let style = effectiveStyle(for: screen)
-        let view = NSHostingView(rootView: NotchContentView(dynamicNotch: self, style: style))
+        let view = DynamicNotchHostingView(rootView: NotchContentView(dynamicNotch: self, style: style))
 
         let panel = DynamicNotchPanel(
             contentRect: .zero,

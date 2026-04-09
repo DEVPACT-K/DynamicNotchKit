@@ -29,4 +29,14 @@ final class DynamicNotchPanel: NSPanel {
     override var canBecomeKey: Bool {
         true
     }
+
+    override var canBecomeMain: Bool {
+        true
+    }
+
+    func performInteractiveAction(_ action: () -> Void) {
+        NSApp.activate(ignoringOtherApps: true)
+        self.makeKeyAndOrderFront(nil)
+        action()
+    }
 }
