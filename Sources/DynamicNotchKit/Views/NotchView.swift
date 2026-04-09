@@ -51,7 +51,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
     }
 
     private var maskHeight: CGFloat {
-        dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
+        dynamicNotch.state == .compact ? compactContentHeight : nil
     }
 
     private var edgeOpacity: Double {
