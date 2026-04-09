@@ -46,16 +46,8 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
         dynamicNotch.state == .expanded ? expandedNotchCornerRadii.bottom : compactNotchCornerRadii.bottom
     }
 
-    private var xOffset: CGFloat {
-        if dynamicNotch.state != .compact {
-            0
-        } else {
-            compactXOffset
-        }
-    }
-
-    private var compactXOffset: CGFloat {
-        (compactTrailingWidth - compactLeadingWidth) / 2
+    private var compactSideWidth: CGFloat {
+        max(compactLeadingWidth, compactTrailingWidth)
     }
 
     private var maskHeight: CGFloat {
@@ -108,7 +100,6 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                     .mask { notchMaskShape }
             }
             .mask { notchMaskShape }
-            .offset(x: xOffset)
             .animation(.smooth, value: [compactLeadingWidth, compactTrailingWidth, compactBottomHeight])
     }
 
@@ -116,7 +107,6 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
         ZStack {
             compactContent()
                 .fixedSize()
-                .offset(x: dynamicNotch.state == .compact ? 0 : compactXOffset)
                 .frame(
                     width: dynamicNotch.state == .compact ? nil : dynamicNotch.notchSize.width,
                     height: dynamicNotch.state == .compact ? compactContentHeight : dynamicNotch.notchSize.height
@@ -128,7 +118,6 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                     maxWidth: dynamicNotch.state == .expanded ? nil : 0,
                     maxHeight: dynamicNotch.state == .expanded ? nil : 0
                 )
-                .offset(x: dynamicNotch.state == .compact ? -compactXOffset : 0)
         }
         .padding(.horizontal, topCornerRadius)
         .fixedSize()
@@ -146,6 +135,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
                         .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactLeadingWidth = $0 }
+                        .frame(width: compactSideWidth, alignment: .trailing)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .trailing)).combined(with: .opacity))
                 }
 
@@ -159,6 +149,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
                         .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactTrailingWidth = $0 }
+                        .frame(width: compactSideWidth, alignment: .leading)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .leading)).combined(with: .opacity))
                 }
             }
