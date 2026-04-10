@@ -65,9 +65,9 @@ public enum DynamicNotchStyle: Sendable {
 
     var openingAnimation: Animation {
         if isNotch {
-            .bouncy(duration: 0.4)
+            .bouncy(duration: 0.1)
         } else {
-            .snappy(duration: 0.4)
+            .snappy(duration: 0.1)
         }
     }
 

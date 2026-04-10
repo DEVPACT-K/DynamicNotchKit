@@ -233,7 +233,7 @@ extension DynamicNotch {
 
         // This is the time it takes for the animation to complete
         // See DynamicNotchStyle's animations
-        try? await Task.sleep(for: .seconds(0.4))
+        try? await Task.sleep(for: .seconds(0.1))
     }
 
     public func compact(on screen: NSScreen = NSScreen.screens[0]) async {
