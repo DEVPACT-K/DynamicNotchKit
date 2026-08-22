@@ -52,9 +52,9 @@ private final class DynamicNotchHostingView<Content: View>: NSHostingView<Conten
 ///     }
 ///
 ///     await notch.expand()
-///     try await Task.sleep(for: .seconds(2))
+///     try await Task.sleep(nanoseconds: UInt64((2) * 1_000_000_000))
 ///     await notch.compact()
-///     try await Task.sleep(for: .seconds(2))
+///     try await Task.sleep(nanoseconds: UInt64((2) * 1_000_000_000))
 ///     await notch.hide()
 /// }
 /// ```
@@ -222,7 +222,7 @@ extension DynamicNotch {
 
                     guard self.state == .hidden else { return }
 
-                    try? await Task.sleep(for: .seconds(0.25))
+                    try? await Task.sleep(nanoseconds: UInt64((0.25) * 1_000_000_000))
                 }
 
                 withAnimation(effectiveConversionAnimation) {
@@ -233,7 +233,7 @@ extension DynamicNotch {
 
         // This is the time it takes for the animation to complete
         // See DynamicNotchStyle's animations
-        try? await Task.sleep(for: .seconds(0.1))
+        try? await Task.sleep(nanoseconds: UInt64((0.1) * 1_000_000_000))
     }
 
     public func compact(on screen: NSScreen = NSScreen.screens[0]) async {
@@ -276,7 +276,7 @@ extension DynamicNotch {
                         self.state = .hidden
                     }
 
-                    try? await Task.sleep(for: .seconds(0.25))
+                    try? await Task.sleep(nanoseconds: UInt64((0.25) * 1_000_000_000))
 
                     guard self.state == .hidden else { return }
                 }
@@ -289,7 +289,7 @@ extension DynamicNotch {
 
         // This is the time it takes for the animation to complete
         // See DynamicNotchStyle's animations
-        try? await Task.sleep(for: .seconds(0.4))
+        try? await Task.sleep(nanoseconds: UInt64((0.4) * 1_000_000_000))
     }
 
     public func hide() async {
@@ -309,7 +309,7 @@ extension DynamicNotch {
 
         if hoverBehavior.contains(.keepVisible), isHovering {
             Task {
-                try? await Task.sleep(for: .seconds(0.1))
+                try? await Task.sleep(nanoseconds: UInt64((0.1) * 1_000_000_000))
                 _hide(completion: completion)
             }
             return
@@ -322,7 +322,7 @@ extension DynamicNotch {
 
         closePanelTask?.cancel()
         closePanelTask = Task {
-            try? await Task.sleep(for: .seconds(0.25)) // Wait for most of animation
+            try? await Task.sleep(nanoseconds: UInt64((0.25) * 1_000_000_000)) // Wait for most of animation
             guard Task.isCancelled != true else { return }
 
             // Fade out window to hide any closing glitches
