@@ -65,18 +65,18 @@ public enum DynamicNotchStyle: Sendable {
 
     var openingAnimation: Animation {
         if isNotch {
-            .bouncy(duration: 0.1)
+            .spring(response: 0.1, dampingFraction: 0.7)
         } else {
-            .snappy(duration: 0.1)
+            .spring(response: 0.1, dampingFraction: 0.9)
         }
     }
 
     var closingAnimation: Animation {
-        .smooth(duration: 0.4)
+        .easeInOut(duration: 0.4)
     }
 
     var conversionAnimation: Animation {
-        .snappy(duration: 0.4)
+        .spring(response: 0.4, dampingFraction: 0.9)
     }
 }
 
