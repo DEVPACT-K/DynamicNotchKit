@@ -134,7 +134,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .leading, spacing: 0) { Color.clear.frame(width: 8) }
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.width) { compactLeadingWidth = g.size.width } })
+                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.width, perform: { newValue in compactLeadingWidth = newValue }) })
                         .frame(width: compactSideWidth, alignment: .trailing)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .trailing)).combined(with: .opacity))
                 }
@@ -148,7 +148,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .trailing, spacing: 0) { Color.clear.frame(width: 8) }
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.width) { compactTrailingWidth = g.size.width } })
+                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.width, perform: { newValue in compactTrailingWidth = newValue }) })
                         .frame(width: compactSideWidth, alignment: .leading)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .leading)).combined(with: .opacity))
                 }
@@ -158,7 +158,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
             if dynamicNotch.state == .compact, !dynamicNotch.disableCompactBottom {
                 dynamicNotch.compactBottomContent
                     .environment(\.notchSection, .compactBottom)
-                    .background(GeometryReader { g in Color.clear.onChange(of: g.size.height) { compactBottomHeight = g.size.height } })
+                    .background(GeometryReader { g in Color.clear.onChange(of: g.size.height, perform: { newValue in compactBottomHeight = newValue }) })
                     .transition(.blur(intensity: 10).combined(with: .scale(y: 0, anchor: .top)).combined(with: .opacity))
             }
         }
