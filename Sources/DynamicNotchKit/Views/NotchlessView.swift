@@ -33,12 +33,12 @@ struct NotchlessView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: 
                             .strokeBorder(.quaternary, lineWidth: 1)
                     }
             }
-            .clipShape(.rect(cornerRadius: cornerRadius))
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .padding(20)
-            .onGeometryChange(for: CGFloat.self, of: \.size.height) { newHeight in
+            .background(GeometryReader { g in Color.clear.onChange(of: g.size.height) { newHeight in
                 // This makes sure that the floating window FULLY slides off before disappearing
                 windowHeight = newHeight
-            }
+            } })
             .offset(y: dynamicNotch.state == .expanded ? dynamicNotch.notchSize.height : -windowHeight)
             .onHover(perform: dynamicNotch.updateHoverState)
     }
