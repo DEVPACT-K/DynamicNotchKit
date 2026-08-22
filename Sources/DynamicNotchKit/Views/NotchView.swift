@@ -134,7 +134,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .leading, spacing: 0) { Color.clear.frame(width: 8) }
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                        .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactLeadingWidth = $0 }
+                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.compactLeadingWidth) { width = g.size.compactLeadingWidth } })
                         .frame(width: compactSideWidth, alignment: .trailing)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .trailing)).combined(with: .opacity))
                 }
@@ -148,7 +148,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
                         .safeAreaInset(edge: .trailing, spacing: 0) { Color.clear.frame(width: 8) }
                         .safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: 4) }
                         .safeAreaInset(edge: .bottom, spacing: 0) { Color.clear.frame(height: 8) }
-                        .onGeometryChange(for: CGFloat.self, of: \.size.width) { compactTrailingWidth = $0 }
+                        .background(GeometryReader { g in Color.clear.onChange(of: g.size.compactTrailingWidth) { width = g.size.compactTrailingWidth } })
                         .frame(width: compactSideWidth, alignment: .leading)
                         .transition(.blur(intensity: 10).combined(with: .scale(x: 0, anchor: .leading)).combined(with: .opacity))
                 }
@@ -158,7 +158,7 @@ struct NotchView<Expanded, CompactLeading, CompactTrailing, CompactBottom>: View
             if dynamicNotch.state == .compact, !dynamicNotch.disableCompactBottom {
                 dynamicNotch.compactBottomContent
                     .environment(\.notchSection, .compactBottom)
-                    .onGeometryChange(for: CGFloat.self, of: \.size.height) { compactBottomHeight = $0 }
+                    .background(GeometryReader { g in Color.clear.onChange(of: g.size.compactBottomHeight) { height = g.size.compactBottomHeight } })
                     .transition(.blur(intensity: 10).combined(with: .scale(y: 0, anchor: .top)).combined(with: .opacity))
             }
         }
